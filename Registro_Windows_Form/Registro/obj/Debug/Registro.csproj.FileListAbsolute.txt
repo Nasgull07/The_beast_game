@@ -1,0 +1,22 @@
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.csproj.AssemblyReference.cache
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.csproj.SuggestedBindingRedirects.cache
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.Form1.resources
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.Properties.Resources.resources
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.csproj.GenerateResource.cache
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.csproj.CoreCompileInputs.cache
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\bin\Debug\Registro.exe.config
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\bin\Debug\Registro.exe
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\bin\Debug\Registro.pdb
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.exe
+C:\Users\monop\OneDrive\Escritorio\Uni\PP (1B)\Registro\Registro\obj\Debug\Registro.pdb
+D:\Uni\SO\Registro\Registro\bin\Debug\Registro.exe.config
+D:\Uni\SO\Registro\Registro\bin\Debug\Registro.exe
+D:\Uni\SO\Registro\Registro\bin\Debug\Registro.pdb
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.csproj.AssemblyReference.cache
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.csproj.SuggestedBindingRedirects.cache
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.Form1.resources
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.Properties.Resources.resources
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.csproj.GenerateResource.cache
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.csproj.CoreCompileInputs.cache
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.exe
+D:\Uni\SO\Registro\Registro\obj\Debug\Registro.pdb
