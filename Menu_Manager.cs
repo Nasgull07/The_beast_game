@@ -21,16 +21,36 @@ using System.Collections.Concurrent;
 public class Menu_Manager : MonoBehaviour
 {
 
-    public IPAddress Direccion_Ip = IPAddress.Parse("10.4.119.5"); //192.168.1.105
+    public IPAddress Direccion_Ip = IPAddress.Parse("10.4.119.5"); //192.168.1.105   
     private int puerto = 50033;
     Socket server;
+
     [SerializeField] private InputField m_UserName = null;
     [SerializeField] private InputField m_Password = null;
+    [SerializeField] private InputField m_Invite = null;
+    [SerializeField] private InputField m_Mensaje_Chat = null;
+
     public TextMeshProUGUI m_Prefab = null;
     public TextMeshProUGUI m_conectados = null;
     public TextMeshProUGUI m_numero = null;
-
+    public TextMeshProUGUI m_lista_invitar = null;
+    public TextMeshProUGUI m_Mensaje_Invitacion = null;
+    public TextMeshProUGUI m_mensaje_loby = null;
+    public TextMeshProUGUI m_Chat = null;
     public TextMeshProUGUI m_Usuario_Conectado = null;
+    public TextMeshProUGUI m_Usuario_Conectado_Loby = null;
+    public TextMeshProUGUI m_Loby_Info = null;
+    
+    public Canvas Main_Menu = null;
+    public Canvas Invitacion = null;
+    public Canvas Loby = null;
+
+    public Button Aceptar = null;
+    public Button Rechazar = null;
+    public Button Enviar = null;
+
+
+    
 
     private ConcurrentQueue<string[]> mensajeQueue = new ConcurrentQueue<string[]>();
 
@@ -40,6 +60,8 @@ public class Menu_Manager : MonoBehaviour
 
     IPEndPoint ipep;
     Socket Server;
+
+    int id_loby;
 
     delegate void DelegadoParaPonerTexto(string texto);
     public void SaveDataBeforeSceneLoad()
@@ -61,6 +83,9 @@ public class Menu_Manager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Main_Menu.enabled = true;
+        Loby.enabled = false;
+        Invitacion.enabled = false;
         LoadDataAfterSceneLoad();
         m_Usuario_Conectado.text = null;
         ipep = new IPEndPoint(this.Direccion_Ip, puerto);
@@ -114,21 +139,42 @@ public class Menu_Manager : MonoBehaviour
                     }
 
                     m_Usuario_Conectado.text = m_UserName.text;
+                    m_Usuario_Conectado_Loby.text = m_Usuario_Conectado.text;
+                    Main_Menu.enabled = false;
+                    Loby.enabled = true;
+                    m_lista_invitar.text = m_conectados.text;
+
 
                     break;
                 case 2:      // respuesta a si mi nombre es bonito
                     m_Prefab.text = mensajeTexto;
                     break;
+
                 case 3:
-                    m_conectados.text = null;
-                    int h = 1;
-                    while (h < mensaje.Length)
+
+                    if (Main_Menu.enabled == true)
                     {
-                        m_conectados.text = m_conectados.text + mensaje[h] + "\n";
-                        h++;
+                        m_conectados.text = null;
+                        int h = 1;
+                        while (h < mensaje.Length)
+                        {
+                            m_conectados.text = m_conectados.text + mensaje[h] + "\n";
+                            h++;
+                        }
+                    }
+                    else if (Loby.enabled == true)
+                    {
+                        m_lista_invitar.text = null;
+                        int h = 1;
+                        while (h < mensaje.Length)
+                        {
+                            m_lista_invitar.text = m_lista_invitar.text + mensaje[h] + "\n";
+                            h++;
+                        }
+
                     }
                     break;
-                case 4:     // Recibimos notificacion
+                case 4:     
                     m_numero.text = mensajeTexto;
                     break;
                 case 5:
@@ -137,6 +183,34 @@ public class Menu_Manager : MonoBehaviour
                 case 0:
 
                     m_Usuario_Conectado.text = null;
+                    break;
+
+                case 6:
+                    if (Invitacion.enabled == false)
+                    {
+                        Invitacion.enabled = true;
+                        string host = mensaje[1];
+                        id_loby = Convert.ToInt32(mensaje[2]);
+                        m_Mensaje_Invitacion.text = host + " te ha invitado a una sala con id:" + Convert.ToString(id_loby);
+                    }
+                    
+
+                    break;
+                case 7:
+                    id_loby = Convert.ToInt32(mensaje[1]);
+                    m_mensaje_loby.text= mensaje[2];
+                    
+
+                    break;
+
+                case 8:
+
+                    m_mensaje_loby.text = mensaje[1];
+                    break;
+                case 9:
+
+                    m_Loby_Info.text = "ID Loby: "+mensaje[1] + '\n' + "Jugadores en la Loby:" + mensaje[2]+ mensaje[3]+ mensaje[4]+ mensaje[5];
+
                     break;
             }
         }
@@ -204,12 +278,25 @@ public class Menu_Manager : MonoBehaviour
             }
             catch (SocketException)
             {
-                m_Prefab.text = "No se pudo establecer conexion con el servidor";
+                m_Prefab.text = m_Usuario_Conectado.text;
 
                 return;
             }
         }
         else { m_Prefab.text = "Ya hay una sesion iniciada, si quiere cambiar de sesion, desconectese de la actual."; }
+    }
+    public void Aceptar_Invitacion()
+    {
+        byte[] Mensaje_Cliente = System.Text.Encoding.ASCII.GetBytes("6/"+ m_Usuario_Conectado_Loby.text +"/1/" + Convert.ToString(id_loby));
+        server.Send(Mensaje_Cliente);
+        Invitacion.enabled = false;
+
+    }
+    public void Rechazar_Invitacion()
+    {
+        byte[] Mensaje_Cliente = System.Text.Encoding.ASCII.GetBytes("6/"+ m_Usuario_Conectado_Loby.text +"/0/" + Convert.ToString( id_loby));
+        server.Send(Mensaje_Cliente);
+        Invitacion.enabled = false;
     }
     public void Sign_Up()
     {
@@ -232,11 +319,11 @@ public class Menu_Manager : MonoBehaviour
             }
             else
             {
- 
+
                 m_Prefab.text = "Porfavor, rellene los datos para ingresar";
             }
 
-   
+
         }
         catch (SocketException ex)
         {
@@ -245,4 +332,45 @@ public class Menu_Manager : MonoBehaviour
         }
     }
 
+    public void Invite()
+    {
+
+        try
+        {
+
+            if (m_Invite.text != "")
+            {
+
+
+                string NOMBRE_HOST = m_Usuario_Conectado_Loby.text; 
+                string NOMBRE_CLIENT = m_Invite.text; 
+
+
+
+                byte[] Mensaje_Cliente = System.Text.Encoding.ASCII.GetBytes("5/" + NOMBRE_HOST + "/" + NOMBRE_CLIENT);
+                server.Send(Mensaje_Cliente);
+
+
+            }
+            else
+            {
+
+                //m_Prefab.text = "Porfavor, rellene los datos para ingresar";
+            }
+
+
+        }
+        catch (SocketException ex)
+        {
+            m_Prefab.text = "No se ha podido establecer la conexion";
+            return;
+        }
+    }
+
+    public void Exit1()
+    {
+        Main_Menu.enabled = true;
+        Loby.enabled = false;
+
+    }
 }
