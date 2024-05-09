@@ -48,15 +48,27 @@ typedef struct {
 } Jugador;
 
 typedef struct {
+	char Nombre[20];
+	char Mensaje[200];
+} Mensaje;
+
+typedef struct {
+	Mensaje Mensajes[20];
+	int num_mensajes;
+}Chat;
+typedef struct {
 	Jugador jugadores[4];
 	int numero_Jug;
 	int ID_Loby;
+	Chat chat;
 } Loby;
 
 typedef struct {
 	Loby Lobys[20];
 	int num_Lobys;
 }Lobys;
+
+
 
 /* VARIABLES GLOBALES*/
 
@@ -69,12 +81,38 @@ Cliente cliente;
 Cliente_Lista Clis;
 Lobys Lobyreal;
 int i;
-int puerto = 50033;
+int puerto = 50030;
 int Socket[100];
 char peticion[512];
 char respuesta[512];
 
 /* FUNCIONES*/
+
+Chat ActualizarChat(char Nombre[20], char MensajeNuevo[200], int idLoby)
+{
+	int nummensajes = Lobyreal.Lobys[idLoby].chat.num_mensajes;
+	if(Lobyreal.Lobys[idLoby].chat.num_mensajes < 20)
+	{
+		sprintf(Lobyreal.Lobys[idLoby].chat.Mensajes[Lobyreal.Lobys[idLoby].chat.num_mensajes].Mensaje, MensajeNuevo);
+		sprintf(Lobyreal.Lobys[idLoby].chat.Mensajes[Lobyreal.Lobys[idLoby].chat.num_mensajes].Nombre, Nombre);
+		Lobyreal.Lobys[idLoby].chat.num_mensajes++;
+	}
+	else
+	{
+		
+		for(int fg = 0; fg<19; fg++)
+		{
+			strcpy(Lobyreal.Lobys[idLoby].chat.Mensajes[fg].Mensaje, Lobyreal.Lobys[idLoby].chat.Mensajes[fg+1].Mensaje );
+			strcpy(Lobyreal.Lobys[idLoby].chat.Mensajes[fg].Nombre, Lobyreal.Lobys[idLoby].chat.Mensajes[fg+1].Nombre);
+			
+		}
+		sprintf(Lobyreal.Lobys[idLoby].chat.Mensajes[nummensajes-1].Mensaje, MensajeNuevo);
+		sprintf(Lobyreal.Lobys[idLoby].chat.Mensajes[nummensajes-1].Nombre, Nombre);
+		Lobyreal.Lobys[idLoby].chat.num_mensajes = nummensajes;
+	}
+	
+	return Lobyreal.Lobys[idLoby].chat;
+}
 
 void conectarBD() {
 	
@@ -175,7 +213,7 @@ void *AtenderCliente (void *socket)
 		char Jugador_Invitado1[20];
 		char Jugador_Invitado2[20];
 		char Jugador_Invitado3[20];
-		if (codigo != 0  && codigo != 3 && codigo != 5 && codigo != 6)
+		if (codigo != 0  && codigo != 3 && codigo != 5 && codigo != 6 && codigo != 7)
 		{
 			
 			p = strtok( NULL, "/");
@@ -206,7 +244,7 @@ void *AtenderCliente (void *socket)
 			}
 			
 		}
-		if (codigo ==0) //peticion de desconexión
+		if (codigo ==0) //peticion de desconexi￳n
 		{
 			int k;
 			for (k = 0; k < 10; k++) {
@@ -334,6 +372,7 @@ void *AtenderCliente (void *socket)
 			Lobyreal.Lobys[Lobyreal.num_Lobys].jugadores[0].Socket = Clis.cliente[hhh].sock;
 			Lobyreal.Lobys[Lobyreal.num_Lobys].numero_Jug++;
 			Lobyreal.num_Lobys++;
+			
 			char crearsala[100];
 			sprintf(crearsala, "7/%d/su sala se ha creado correctamente",Lobyreal.Lobys[Lobyreal.num_Lobys-1].ID_Loby );
 			write (sock_conn, crearsala, strlen(crearsala));
@@ -383,9 +422,11 @@ void *AtenderCliente (void *socket)
 				sprintf(confirmacion, "8/Se ha unido a la sala %d" , idloby);
 				printf(confirmacion);
 				write (Clis.cliente[hhh].sock, confirmacion, strlen(confirmacion));
-				sprintf(confirmacion, "8/%s se ha unido a la sala", Nombre);
-				printf(confirmacion);
-				Notificar_Sala(confirmacion, idloby);
+/*				sprintf(confirmacion, "8/%s se ha unido a la sala", Nombre);*/
+/*				printf(confirmacion);*/
+/*				Notificar_Sala(confirmacion, idloby);*/
+				
+				
 				dd=0;
 				char listaconectados[100];
 				sprintf(listaconectados, "9/%d", idloby );
@@ -404,6 +445,26 @@ void *AtenderCliente (void *socket)
 				Notificar_Sala(listaconectados, idloby);
 				
 				
+				
+				char Menj[200];
+				sprintf(Menj,  "se ha unido a la sala");
+				
+				Chat chattt;
+				char mensajje[4000];
+				chattt = ActualizarChat(Nombre, Menj, idloby);
+				char mensajecompletoo[200];
+				sprintf(mensajje, "10");
+				for(int gh = 0; gh < chattt.num_mensajes; gh++)
+				{
+					sprintf(mensajecompletoo, chattt.Mensajes[gh].Nombre);
+					sprintf(mensajecompletoo + strlen(mensajecompletoo), ": ");
+					sprintf(mensajecompletoo + strlen(mensajecompletoo), chattt.Mensajes[gh].Mensaje);
+					
+					sprintf(mensajje + strlen(mensajje), "/%s",	mensajecompletoo);
+				}
+				Notificar_Sala(mensajje, idloby);
+				
+				
 			}
 			else
 			{
@@ -413,8 +474,34 @@ void *AtenderCliente (void *socket)
 				Notificar_Sala(confirmacion, idloby);
 			}
 		}
+		if(codigo == 7)
+		{
+			int idloby;
+			p = strtok( NULL, "/");
+			idloby = atoi(p);
+			char mensaje[4000];
+			p = strtok( NULL, "/");
+			sprintf(mensaje, p);
+			Chat chatt;
+			
+			chatt = ActualizarChat(Nombre, mensaje, idloby);
+			char mensajecompleto[200];
+			sprintf(mensaje, "10/");
+			for(int gh = 0; gh < chatt.num_mensajes; gh++)
+			{
+				char mensajecompleto[200];
+				sprintf(mensajecompleto, chatt.Mensajes[gh].Nombre);
+				sprintf(mensajecompleto + strlen(mensajecompleto), ": ");
+				sprintf(mensajecompleto + strlen(mensajecompleto), chatt.Mensajes[gh].Mensaje);
+				
+				sprintf(mensaje + strlen(mensaje), "%s/",	mensajecompleto);
+			}
+			Notificar_Sala(mensaje, idloby);
+			
+			
+		}
 		
-		if (codigo != 0 && codigo != 5 && codigo != 6)
+		if (codigo != 0 && codigo != 5 && codigo != 6 && codigo !=7)
 		{
 			printf ("Respuesta: %s\n", respuesta);
 			// Enviamos respuesta
@@ -442,6 +529,8 @@ void Notificar_Sala(char mensaje[300], int idloby)
 		}
 		bb++;
 	}
+	printf(mensaje);
+	sprintf(mensaje, " ");
 }
 
 int Encontrar_Posicion (char Nombre[20])
@@ -498,17 +587,17 @@ int main(int argc, char *argv[])
 	
 	conectarBD();
 	// Ejecutar la consulta para crear la base de datos y las tablas
-	/*	ejecutarConsultaSQL("DROP DATABASE IF EXISTS JUEGO");*/
-	/*	ejecutarConsultaSQL("CREATE DATABASE JUEGO");*/
-	/*	ejecutarConsultaSQL("USE JUEGO");*/
-	/*	ejecutarConsultaSQL("CREATE TABLE jugadores(ID INTEGER PRIMARY KEY AUTO_INCREMENT, NOMBRE varchar(20) not null, CONTRASENYA varchar(20)not null, PUNTOS integer, VICTORIAS integer)");*/
-	/*	ejecutarConsultaSQL("CREATE TABLE partidas(ID integer primary key not null, FECHA varchar(20), TIEMPO time, JUGADORES integer)");*/
-	/*	ejecutarConsultaSQL("CREATE TABLE relacionjp (ID integer primary key not null, ID_J integer not null, foreign key (ID_J) references jugadores(ID), ID_P integer not null, foreign key (ID_P) references partidas(ID))");*/
+/*		ejecutarConsultaSQL("DROP DATABASE IF EXISTS JUEGO");*/
+/*		ejecutarConsultaSQL("CREATE DATABASE JUEGO");*/
+/*		ejecutarConsultaSQL("USE JUEGO");*/
+/*		ejecutarConsultaSQL("CREATE TABLE jugadores(ID INTEGER PRIMARY KEY AUTO_INCREMENT, NOMBRE varchar(20) not null, CONTRASENYA varchar(20)not null, PUNTOS integer, VICTORIAS integer)");*/
+/*		ejecutarConsultaSQL("CREATE TABLE partidas(ID integer primary key not null, FECHA varchar(20), TIEMPO time, JUGADORES integer)");*/
+/*		ejecutarConsultaSQL("CREATE TABLE relacionjp (ID integer primary key not null, ID_J integer not null, foreign key (ID_J) references jugadores(ID), ID_P integer not null, foreign key (ID_P) references partidas(ID))");*/
 	
-	// Insertar datos en las tablas
-	/*	ejecutarConsultaSQL("INSERT INTO jugadores (ID, NOMBRE, CONTRASENYA, PUNTOS, VICTORIAS) VALUES (1, 'pol', 'contra', 100, 10), (2, 'Jugador2', 'contrasenya', 200, 15), (3, 'Jugador3', 'contrasenya3', 150, 12)");*/
-	/*	ejecutarConsultaSQL("INSERT INTO partidas (ID, FECHA, TIEMPO, JUGADORES) VALUES (1, '03-01', '12:00:00', 3), (2, '03-02', '15:30:00', 2), (3, '03-03', '18:45:00', 1)");*/
-	/*	ejecutarConsultaSQL("INSERT INTO relacionjp (ID, ID_J, ID_P) VALUES (1, 1, 1), (2, 2, 1)");*/
+/*	 Insertar datos en las tablas*/
+/*		ejecutarConsultaSQL("INSERT INTO jugadores (ID, NOMBRE, CONTRASENYA, PUNTOS, VICTORIAS) VALUES (1, 'pol', 'contra', 100, 10), (2, 'Jugador2', 'contrasenya', 200, 15), (3, 'Jugador3', 'contrasenya3', 150, 12)");*/
+/*		ejecutarConsultaSQL("INSERT INTO partidas (ID, FECHA, TIEMPO, JUGADORES) VALUES (1, '03-01', '12:00:00', 3), (2, '03-02', '15:30:00', 2), (3, '03-03', '18:45:00', 1)");*/
+/*		ejecutarConsultaSQL("INSERT INTO relacionjp (ID, ID_J, ID_P) VALUES (1, 1, 1), (2, 2, 1)");*/
 	
 	
 	int sock_conn, sock_listen;
