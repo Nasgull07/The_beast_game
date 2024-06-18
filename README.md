@@ -6,3 +6,5 @@ Video v2 -------> Els documents amb tag 'IMPORTANTS' es lo que em pogut penjar d
 Video v3 --------->  https://youtu.be/AQnHr5TlN44
 
 Video v4 -------> https://youtu.be/02MqFN3V_V0
+
+Video final ------->https://youtu.be/ec6LeIl0NAA
